@@ -12,22 +12,25 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .cat-btn.active { background-color: #F39C12; color: white; border-color: #F39C12; }
+        .cart-footer { transform: translateY(100%); transition: transform 0.4s ease; }
+        .cart-footer.show { transform: translateY(0); }
     </style>
 </head>
-<body class="bg-gray-50 pb-24">
+<body class="bg-gray-50 pb-32">
 
-    <div class="relative h-52 w-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');">
+    <div class="relative h-52 w-full bg-cover bg-center shadow-inner" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');">
         <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
     <div class="px-4 -mt-16 relative z-10">
         <div class="bg-white rounded-3xl p-5 shadow-xl flex items-center space-x-4 border border-gray-100">
-            <img id="restau-logo" src="https://via.placeholder.com/80" class="w-20 h-20 rounded-2xl border-2 border-orange-50 shadow-sm object-cover bg-white">
+            <img id="restau-logo" src="" class="w-20 h-20 rounded-2xl border-2 border-orange-50 shadow-sm object-cover bg-white">
             <div>
-                <h1 id="restau-nom" class="text-2xl font-black text-gray-800 tracking-tight">Chargement...</h1>
-                <p class="text-sm text-gray-400 font-medium"><i class="fas fa-map-marker-alt text-orange-500 mr-1"></i> Pétion-Ville, Haïti</p>
-                <div class="flex items-center mt-1">
-                    <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">Ouvert</span>
+                <h1 id="restau-nom" class="text-2xl font-black text-gray-800 tracking-tight text-orange-500">Chargement...</h1>
+                <p id="restau-desc" class="text-[10px] text-gray-400 font-medium italic mb-1 line-clamp-1"></p>
+                <div class="flex items-center space-x-2">
+                    <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold uppercase">Ouvert</span>
+                    <span id="restau-tel" class="text-[10px] text-gray-400 font-bold"></span>
                 </div>
             </div>
         </div>
@@ -43,20 +46,22 @@
         <button onclick="filterMenu('Desserts')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Desserts</button>
     </div>
 
-    <div id="menu-container" class="px-4 space-y-10">
+    <div id="menu-container" class="px-4 space-y-10"></div>
+
+    <div id="cart-bar" class="cart-footer fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-5 rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50">
+        <div class="flex justify-between items-center max-w-lg mx-auto">
+            <div>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Total</p>
+                <p id="total-price" class="text-2xl font-black text-gray-800">0 HTG</p>
+            </div>
+            <button onclick="sendOrder()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-orange-200 flex items-center space-x-2 transition-all active:scale-95">
+                <i class="fab fa-whatsapp text-xl"></i>
+                <span>COMMANDER</span>
+            </button>
         </div>
-
-    <a id="whatsapp-link" href="#" class="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl flex items-center space-x-3 z-50 hover:scale-105 transition-transform active:scale-95">
-        <i class="fab fa-whatsapp text-3xl"></i>
-        <span class="font-bold pr-2">Commander</span>
-    </a>
-
-    <div class="mt-20 p-10 text-center">
-        <p class="text-xs text-gray-300 uppercase tracking-widest font-bold">Propulsé par Prisme</p>
     </div>
 
     <script>
-        // Kopi "firebaseConfig" ou a isit la
         const firebaseConfig = {
             apiKey: "AIza...",
             authDomain: "le-menu-20dd1.firebaseapp.com",
@@ -72,68 +77,112 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const resID = urlParams.get('id') || 'lakay_gourmet_id';
-        let allData = {};
+        
+        let allItems = {};
+        let cart = {};
+        let restauPhone = "";
+        let restauNom = "";
 
-        // 1. Rale Enfòmasyon Restoran
+        // 1. Rale Info Restoran (selon structure foto 35/36 ou a)
         db.ref('restaurants/' + resID + '/info').on('value', (snap) => {
             const info = snap.val();
             if(info) {
+                restauNom = info.nom;
+                restauPhone = info.telephone;
                 document.getElementById('restau-nom').innerText = info.nom;
+                document.getElementById('restau-desc').innerText = info.description;
                 document.getElementById('restau-logo').src = info.logoUrl;
-                document.getElementById('whatsapp-link').href = `https://wa.me/${info.phone}?text=Bonjour ${info.nom}, je voudrais commander...`;
+                document.getElementById('restau-tel').innerText = info.telephone;
             }
         });
 
-        // 2. Rale ak Trete Menu an
+        // 2. Rale Menu (P001, P002...)
         db.ref('restaurants/' + resID + '/menu').on('value', (snap) => {
-            allData = snap.val() || {};
-            filterMenu('Tout'); // Montre tout nan kòmansman
+            allItems = snap.val() || {};
+            filterMenu('Tout');
         });
 
         function filterMenu(selectedCat) {
-            // Chanje bouton aktif la
             document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.innerText === selectedCat) btn.classList.add('active');
+                btn.classList.toggle('active', btn.innerText === selectedCat);
             });
 
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
-
             const categories = ["Entrées", "Plats Principaux", "Grillades", "Fruits de mer", "Boissons", "Desserts"];
 
             categories.forEach(cat => {
-                // Filtre si se pa "Tout" epi se pa kategori chwazi a, sote l
                 if (selectedCat !== 'Tout' && selectedCat !== cat) return;
+                const items = Object.keys(allItems).filter(key => allItems[key].categorie === cat);
 
-                // Jwenn tout manje ki nan kategori sa a
-                const itemsInCat = Object.values(allData).filter(item => item.categorie === cat);
-
-                if (itemsInCat.length > 0) {
-                    // Ajoute Tit Kategori a
-                    let catSection = `<div>
-                        <h2 class="text-xl font-black text-gray-800 mb-5 flex items-center">
-                            <span class="w-1.5 h-6 bg-orange-500 rounded-full mr-3"></span>${cat}
-                        </h2>
-                        <div class="grid grid-cols-1 gap-4">`;
-
-                    // Ajoute chak manje
-                    itemsInCat.forEach(item => {
-                        catSection += `
-                            <div class="bg-white rounded-3xl p-3 shadow-sm border border-gray-50 flex items-center space-x-4">
-                                <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-2xl object-cover shadow-sm">
-                                <div class="flex-1 pr-2">
-                                    <h3 class="font-bold text-gray-800 text-lg">${item.nom}</h3>
-                                    <p class="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">${item.description || ''}</p>
-                                    <div class="mt-3 text-[#F39C12] font-black text-lg">${item.prix}</div>
+                if (items.length > 0) {
+                    let section = `<div><h2 class="text-xl font-black text-gray-800 mb-5 flex items-center uppercase tracking-tight"><span class="w-1.5 h-6 bg-orange-500 rounded-full mr-3"></span>${cat}</h2><div class="space-y-4">`;
+                    
+                    items.forEach(id => {
+                        const item = allItems[id];
+                        const qty = cart[id] || 0;
+                        section += `
+                            <div class="bg-white rounded-3xl p-3 shadow-sm border border-gray-100 flex items-center space-x-4">
+                                <img src="${item.imageUrl}" class="w-24 h-24 rounded-2xl object-cover">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-gray-800">${item.nom}</h3>
+                                    <p class="text-[10px] text-gray-400 line-clamp-1">${item.description || ''}</p>
+                                    <div class="mt-2 flex justify-between items-center">
+                                        <span class="text-orange-500 font-black text-sm">${item.prix}</span>
+                                        <div class="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
+                                            <button onclick="updateCart('${id}', -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400 active:bg-orange-100"><i class="fas fa-minus text-xs"></i></button>
+                                            <span id="qty-${id}" class="mx-3 font-black text-gray-700 text-sm">${qty}</span>
+                                            <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-orange-500 rounded-lg shadow-sm text-white active:scale-90"><i class="fas fa-plus text-xs"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>`;
                     });
-
-                    catSection += `</div></div>`;
-                    container.innerHTML += catSection;
+                    container.innerHTML += section + `</div></div>`;
                 }
             });
+        }
+
+        function updateCart(id, change) {
+            const currentQty = cart[id] || 0;
+            const newQty = Math.max(0, currentQty + change);
+            
+            if (newQty === 0) delete cart[id];
+            else cart[id] = newQty;
+
+            document.getElementById(`qty-${id}`).innerText = newQty;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            let hasItems = false;
+            
+            Object.keys(cart).forEach(id => {
+                const price = parseInt(allItems[id].prix.replace(/\D/g,''));
+                total += price * cart[id];
+                hasItems = true;
+            });
+
+            document.getElementById('total-price').innerText = total + " HTG";
+            document.getElementById('cart-bar').classList.toggle('show', hasItems);
+        }
+
+        function sendOrder() {
+            let message = `*COMMANDE PRISME - ${restauNom}*\n\n`;
+            let total = 0;
+
+            Object.keys(cart).forEach(id => {
+                const item = allItems[id];
+                const price = parseInt(item.prix.replace(/\D/g,''));
+                const subtotal = price * cart[id];
+                message += `• ${cart[id]}x ${item.nom} (${item.prix})\n`;
+                total += subtotal;
+            });
+
+            message += `\n*TOTAL: ${total} HTG*`;
+            const waUrl = `https://wa.me/${restauPhone}?text=${encodeURIComponent(message)}`;
+            window.open(waUrl, '_blank');
         }
     </script>
 </body>
