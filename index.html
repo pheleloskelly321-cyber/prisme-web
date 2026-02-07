@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -38,13 +39,7 @@
 
     <div class="flex overflow-x-auto space-x-3 px-4 py-8 no-scrollbar" id="category-bar">
         <button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Tout</button>
-        <button onclick="filterMenu('Entrées')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Entrées</button>
-        <button onclick="filterMenu('Plats Principaux')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Plats Principaux</button>
-        <button onclick="filterMenu('Grillades')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Grillades</button>
-        <button onclick="filterMenu('Fruits de mer')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Fruits de mer</button>
-        <button onclick="filterMenu('Boissons')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Boissons</button>
-        <button onclick="filterMenu('Desserts')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Desserts</button>
-    </div>
+        </div>
 
     <div id="menu-container" class="px-4 space-y-10"></div>
 
@@ -54,14 +49,14 @@
                 <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Total</p>
                 <p id="total-price" class="text-2xl font-black text-gray-800">0 HTG</p>
             </div>
-            <button onclick="sendOrder()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-orange-200 flex items-center space-x-2 transition-all active:scale-95">
-                <i class="fab fa-whatsapp text-xl"></i>
+            <button onclick="askTableNumber()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-orange-200 flex items-center space-x-2 transition-all active:scale-95">
                 <span>COMMANDER</span>
             </button>
         </div>
     </div>
 
     <script>
+        // Konfigirasyon Firebase ou
         const firebaseConfig = {
             apiKey: "AIza...",
             authDomain: "le-menu-20dd1.firebaseapp.com",
@@ -80,15 +75,13 @@
         
         let allItems = {};
         let cart = {};
-        let restauPhone = "";
         let restauNom = "";
 
-        // 1. Rale Info Restoran (selon structure foto 35/36 ou a)
+        // 1. Rale Enfòmasyon Restoran
         db.ref('restaurants/' + resID + '/info').on('value', (snap) => {
             const info = snap.val();
             if(info) {
                 restauNom = info.nom;
-                restauPhone = info.telephone;
                 document.getElementById('restau-nom').innerText = info.nom;
                 document.getElementById('restau-desc').innerText = info.description;
                 document.getElementById('restau-logo').src = info.logoUrl;
@@ -96,11 +89,22 @@
             }
         });
 
-        // 2. Rale Menu (P001, P002...)
+        // 2. Rale Menu
         db.ref('restaurants/' + resID + '/menu').on('value', (snap) => {
             allItems = snap.val() || {};
+            updateCategoryButtons();
             filterMenu('Tout');
         });
+
+        function updateCategoryButtons() {
+            const cats = new Set();
+            Object.values(allItems).forEach(item => { if(item.categorie) cats.add(item.categorie); });
+            const bar = document.getElementById('category-bar');
+            bar.innerHTML = `<button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Tout</button>`;
+            cats.forEach(cat => {
+                bar.innerHTML += `<button onclick="filterMenu('${cat}')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">${cat}</button>`;
+            });
+        }
 
         function filterMenu(selectedCat) {
             document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -109,9 +113,10 @@
 
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
-            const categories = ["Entrées", "Plats Principaux", "Grillades", "Fruits de mer", "Boissons", "Desserts"];
+            
+            const catsInMenu = [...new Set(Object.values(allItems).map(i => i.categorie))];
 
-            categories.forEach(cat => {
+            catsInMenu.forEach(cat => {
                 if (selectedCat !== 'Tout' && selectedCat !== cat) return;
                 const items = Object.keys(allItems).filter(key => allItems[key].categorie === cat);
 
@@ -130,9 +135,9 @@
                                     <div class="mt-2 flex justify-between items-center">
                                         <span class="text-orange-500 font-black text-sm">${item.prix}</span>
                                         <div class="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
-                                            <button onclick="updateCart('${id}', -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400 active:bg-orange-100"><i class="fas fa-minus text-xs"></i></button>
+                                            <button onclick="updateCart('${id}', -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400"><i class="fas fa-minus text-xs"></i></button>
                                             <span id="qty-${id}" class="mx-3 font-black text-gray-700 text-sm">${qty}</span>
-                                            <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-orange-500 rounded-lg shadow-sm text-white active:scale-90"><i class="fas fa-plus text-xs"></i></button>
+                                            <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-orange-500 rounded-lg shadow-sm text-white"><i class="fas fa-plus text-xs"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -146,10 +151,8 @@
         function updateCart(id, change) {
             const currentQty = cart[id] || 0;
             const newQty = Math.max(0, currentQty + change);
-            
             if (newQty === 0) delete cart[id];
             else cart[id] = newQty;
-
             document.getElementById(`qty-${id}`).innerText = newQty;
             calculateTotal();
         }
@@ -157,32 +160,74 @@
         function calculateTotal() {
             let total = 0;
             let hasItems = false;
-            
             Object.keys(cart).forEach(id => {
                 const price = parseInt(allItems[id].prix.replace(/\D/g,''));
                 total += price * cart[id];
                 hasItems = true;
             });
-
-            document.getElementById('total-price').innerText = total + " HTG";
+            document.getElementById('total-price').innerText = total.toLocaleString() + " HTG";
             document.getElementById('cart-bar').classList.toggle('show', hasItems);
         }
 
-        function sendOrder() {
-            let message = `*COMMANDE PRISME - ${restauNom}*\n\n`;
-            let total = 0;
+        // FONKSYON POU MANDE TAB LA
+        async function askTableNumber() {
+            const { value: table } = await Swal.fire({
+                title: 'Numéro de Table',
+                input: 'number',
+                inputLabel: 'À quelle table êtes-vous assis ?',
+                inputPlaceholder: 'Ex: 5',
+                confirmButtonText: 'Confirmer',
+                confirmButtonColor: '#F39C12',
+                showCancelButton: true,
+                cancelButtonText: 'Annuler'
+            });
+
+            if (table) {
+                sendOrderToFirebase(table);
+            }
+        }
+
+        function sendOrderToFirebase(tableNumber) {
+            const orderID = "ORDER_" + Date.now();
+            let itemsToSave = {};
+            let totalOrder = 0;
 
             Object.keys(cart).forEach(id => {
                 const item = allItems[id];
                 const price = parseInt(item.prix.replace(/\D/g,''));
-                const subtotal = price * cart[id];
-                message += `• ${cart[id]}x ${item.nom} (${item.prix})\n`;
-                total += subtotal;
+                itemsToSave[id] = {
+                    nom: item.nom,
+                    quantite: cart[id],
+                    prix: item.prix,
+                    subtotal: price * cart[id]
+                };
+                totalOrder += price * cart[id];
             });
 
-            message += `\n*TOTAL: ${total} HTG*`;
-            const waUrl = `https://wa.me/${restauPhone}?text=${encodeURIComponent(message)}`;
-            window.open(waUrl, '_blank');
+            const finalOrder = {
+                items: itemsToSave,
+                statut: "nouveau",
+                table: "Table " + tableNumber,
+                timestamp: Date.now(),
+                total: totalOrder + " HTG"
+            };
+
+            // Voye kòmand lan nan Firebase
+            db.ref(`restaurants/${resID}/commandes/${orderID}`).set(finalOrder)
+            .then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Merci !',
+                    text: 'Votre commande a été envoyée au restaurant.',
+                    confirmButtonColor: '#F39C12'
+                });
+                cart = {}; // Vide panyen an
+                calculateTotal();
+                filterMenu('Tout');
+            })
+            .catch((error) => {
+                Swal.fire('Erreur', 'Impossible d\'envoyer la commande', 'error');
+            });
         }
     </script>
 </body>
