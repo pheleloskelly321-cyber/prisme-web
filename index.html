@@ -14,66 +14,53 @@
         .cat-btn.active { background-color: #F39C12; color: white; border-color: #F39C12; }
         .cart-footer { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .cart-footer.show { transform: translateY(0); }
-        .item-card { transition: all 0.2s ease; }
-        .item-card:active { transform: scale(0.97); }
     </style>
 </head>
 <body class="bg-gray-50 pb-32">
 
-    <div id="restau-banner" class="relative h-56 w-full bg-cover bg-center shadow-inner" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');">
-        <div class="absolute inset-0 bg-black/40 italic flex items-end p-6">
-             <p id="promo-text" class="text-white text-xs font-bold opacity-80"></p>
-        </div>
+    <div id="restau-banner" class="relative h-48 w-full bg-cover bg-center bg-gray-200" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');">
+        <div class="absolute inset-0 bg-black/30"></div>
     </div>
 
-    <div class="px-4 -mt-12 relative z-10">
-        <div class="bg-white rounded-[32px] p-6 shadow-2xl flex items-center space-x-4 border border-gray-50">
-            <img id="restau-logo" src="" class="w-20 h-20 rounded-2xl border-4 border-white shadow-lg object-cover bg-white">
+    <div class="px-4 -mt-10 relative z-10">
+        <div class="bg-white rounded-3xl p-5 shadow-xl flex items-center space-x-4 border border-gray-100">
+            <img id="restau-logo" src="https://via.placeholder.com/80" class="w-20 h-20 rounded-2xl border-2 border-white shadow-md object-cover">
             <div class="flex-1">
-                <h1 id="restau-nom" class="text-2xl font-black text-gray-800 tracking-tight leading-none italic uppercase">Chargement...</h1>
-                <p id="restau-desc" class="text-[10px] text-gray-400 font-medium mt-1 line-clamp-2 italic leading-tight"></p>
-                <div class="flex items-center space-x-3 mt-2">
-                    <span class="text-[9px] bg-green-100 text-green-600 px-2.5 py-1 rounded-full font-black uppercase tracking-widest">Ouvert</span>
-                    <span id="restau-tel" class="text-[10px] text-gray-500 font-bold tracking-tighter"></span>
+                <h1 id="restau-nom" class="text-xl font-black text-gray-800 uppercase tracking-tight">Chargement...</h1>
+                <p id="restau-desc" class="text-[11px] text-gray-400 font-medium line-clamp-1 italic"></p>
+                <div class="flex items-center space-x-2 mt-1">
+                    <span class="text-[9px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">OUVERT</span>
+                    <span id="restau-tel" class="text-[10px] text-gray-500 font-bold"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="flex overflow-x-auto space-x-3 px-4 py-8 no-scrollbar" id="category-bar">
-        <button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Tout</button>
-        <button onclick="filterMenu('Entrées')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Entrées</button>
-        <button onclick="filterMenu('Plats Principaux')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Plats</button>
-        <button onclick="filterMenu('Grillades')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Grillades</button>
-        <button onclick="filterMenu('Fruits de mer')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Fruits de mer</button>
-        <button onclick="filterMenu('Boissons')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Boissons</button>
-        <button onclick="filterMenu('Desserts')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Desserts</button>
-    </div>
-
-    <div id="menu-container" class="px-4 space-y-10">
-        <div class="flex flex-col items-center justify-center py-20 opacity-20">
-            <i class="fas fa-utensils text-5xl mb-4"></i>
-            <p class="italic font-bold">Initialisation de Prisme...</p>
+    <div class="flex overflow-x-auto space-x-3 px-4 py-6 no-scrollbar" id="category-bar">
+        <button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold text-sm shadow-sm transition-all">Tout</button>
         </div>
+
+    <div id="menu-container" class="px-4 space-y-8">
+        <div class="text-center py-20 text-gray-400 italic">Chargement du menu...</div>
     </div>
 
-    <div id="cart-bar" class="cart-footer fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-6 rounded-t-[40px] shadow-[0_-15px_50px_rgba(0,0,0,0.15)] z-50">
+    <div id="cart-bar" class="cart-footer fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-5 rounded-t-[35px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50">
         <div class="flex justify-between items-center max-w-lg mx-auto">
             <div>
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Total</p>
-                <p id="total-price" class="text-2xl font-black text-gray-900">0 HTG</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Total</p>
+                <p id="total-price" class="text-xl font-black text-gray-800">0 HTG</p>
             </div>
-            <button onclick="sendOrder()" class="bg-[#F39C12] hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-orange-200 flex items-center space-x-3 transition-all active:scale-95">
-                <i class="fab fa-whatsapp text-xl"></i>
-                <span class="text-sm uppercase tracking-tight">Commander</span>
+            <button onclick="sendOrder()" class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg flex items-center space-x-2 active:scale-95 transition-all">
+                <i class="fab fa-whatsapp"></i>
+                <span class="text-xs uppercase">Commander</span>
             </button>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION FIREBASE
+        // Kofigirasyon Firebase (Verifye sa yo nan Console Firebase ou)
         const firebaseConfig = {
-            apiKey: "AIza...",
+            apiKey: "AIza...", 
             authDomain: "le-menu-20dd1.firebaseapp.com",
             databaseURL: "https://le-menu-20dd1-default-rtdb.firebaseio.com",
             projectId: "le-menu-20dd1",
@@ -85,7 +72,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Rale ID nan URL la (?id=...)
         const urlParams = new URLSearchParams(window.location.search);
         const resID = urlParams.get('id');
         
@@ -97,124 +83,108 @@
         let cart = {};
         let restauPhone = "";
         let restauNom = "";
+        let currentCategory = "Tout";
 
-        // 1. Rale Done Restoran yo (Info)
+        // 1. Rale Info Restaurant
         db.ref(`restaurants/${resID}/info`).on('value', (snap) => {
             const info = snap.val();
             if(info) {
-                restauNom = info.nom || "Restaurant";
-                restauPhone = info.telephone || "";
-                document.getElementById('restau-nom').innerText = restauNom;
+                restauNom = info.nom;
+                restauPhone = info.telephone;
+                document.getElementById('restau-nom').innerText = info.nom;
                 document.getElementById('restau-desc').innerText = info.description || "";
                 document.getElementById('restau-logo').src = info.logoUrl || "";
                 document.getElementById('restau-tel').innerText = info.telephone || "";
-                if(info.bannerUrl) {
-                    document.getElementById('restau-banner').style.backgroundImage = `url('${info.bannerUrl}')`;
-                }
             }
         });
 
-        // 2. Rale Menu a (P001, P002...)
+        // 2. Rale Menu
         db.ref(`restaurants/${resID}/menu`).on('value', (snap) => {
             allItems = snap.val() || {};
-            filterMenu('Tout');
+            updateCategoryBar();
+            filterMenu(currentCategory);
         });
 
-        function filterMenu(selectedCat) {
+        function updateCategoryBar() {
+            const cats = new Set();
+            Object.values(allItems).forEach(item => { if(item.categorie) cats.add(item.categorie); });
+            
+            const bar = document.getElementById('category-bar');
+            bar.innerHTML = `<button onclick="filterMenu('Tout')" class="cat-btn ${currentCategory === 'Tout' ? 'active' : ''} flex-shrink-0 px-6 py-2 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold text-sm shadow-sm">Tout</button>`;
+            
+            cats.forEach(cat => {
+                bar.innerHTML += `<button onclick="filterMenu('${cat}')" class="cat-btn ${currentCategory === cat ? 'active' : ''} flex-shrink-0 px-6 py-2 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold text-sm shadow-sm">${cat}</button>`;
+            });
+        }
+
+        function filterMenu(cat) {
+            currentCategory = cat;
             document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === selectedCat || (selectedCat === 'Plats Principaux' && btn.innerText === 'Plats'));
+                btn.classList.toggle('active', btn.innerText === cat);
             });
 
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
-            const categories = ["Entrées", "Plats Principaux", "Grillades", "Fruits de mer", "Boissons", "Desserts"];
 
-            categories.forEach(cat => {
-                if (selectedCat !== 'Tout' && selectedCat !== cat) return;
-                
-                // Filtre done yo selon kategori a
-                const itemsKeys = Object.keys(allItems).filter(key => allItems[key].categorie === cat);
+            const filteredKeys = Object.keys(allItems).filter(key => cat === 'Tout' || allItems[key].categorie === cat);
 
-                if (itemsKeys.length > 0) {
-                    let section = `<div>
-                        <h2 class="text-[11px] font-black text-gray-400 mb-4 flex items-center uppercase tracking-[0.3em]">
-                            <span class="w-8 h-[2px] bg-orange-500 rounded-full mr-3"></span>${cat}
-                        </h2>
-                        <div class="grid grid-cols-1 gap-4">`;
-                    
-                    itemsKeys.forEach(id => {
-                        const item = allItems[id];
-                        const qty = cart[id] || 0;
-                        section += `
-                            <div class="item-card bg-white rounded-[28px] p-3 shadow-sm border border-gray-100 flex items-center space-x-4">
-                                <div class="relative">
-                                    <img src="${item.imageUrl}" class="w-24 h-24 rounded-[22px] object-cover bg-gray-50 shadow-inner">
-                                    ${qty > 0 ? `<div class="absolute -top-2 -right-2 bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white">${qty}</div>` : ''}
+            if(filteredKeys.length === 0) {
+                container.innerHTML = "<p class='text-center py-10 text-gray-400 italic'>Aucun article disponible</p>";
+                return;
+            }
+
+            filteredKeys.forEach(id => {
+                const item = allItems[id];
+                const qty = cart[id] || 0;
+                container.innerHTML += `
+                    <div class="bg-white rounded-[2.5rem] p-3 shadow-sm border border-gray-50 flex items-center space-x-4">
+                        <img src="${item.imageUrl}" class="w-24 h-24 rounded-[2rem] object-cover bg-gray-50">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-sm">${item.nom}</h3>
+                            <p class="text-orange-500 font-black text-sm mt-1">${item.prix}</p>
+                            <div class="mt-3 flex justify-end">
+                                <div class="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
+                                    <button onclick="updateCart('${id}', -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400"><i class="fas fa-minus text-[10px]"></i></button>
+                                    <span class="mx-3 font-black text-gray-700 text-sm">${qty}</span>
+                                    <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-orange-500 rounded-lg shadow-sm text-white"><i class="fas fa-plus text-[10px]"></i></button>
                                 </div>
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-gray-800 text-base leading-tight italic">${item.nom}</h3>
-                                    <p class="text-[10px] text-gray-400 line-clamp-1 mt-0.5 font-medium">${item.description || ''}</p>
-                                    <div class="mt-3 flex justify-between items-center">
-                                        <span class="text-orange-500 font-black text-base italic">${item.prix}</span>
-                                        <div class="flex items-center bg-gray-100 rounded-xl p-1 border border-gray-200">
-                                            <button onclick="updateCart('${id}', -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400"><i class="fas fa-minus text-[10px]"></i></button>
-                                            <span class="mx-3 font-black text-gray-800 text-sm">${qty}</span>
-                                            <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-[#F39C12] rounded-lg shadow-sm text-white"><i class="fas fa-plus text-[10px]"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                    container.innerHTML += section + `</div></div>`;
-                }
+                            </div>
+                        </div>
+                    </div>`;
             });
         }
 
         function updateCart(id, change) {
             const currentQty = cart[id] || 0;
             const newQty = Math.max(0, currentQty + change);
-            
-            if (newQty === 0) delete cart[id];
-            else cart[id] = newQty;
-
-            filterMenu(document.querySelector('.cat-btn.active').innerText); // Rafrechi view a
+            if (newQty === 0) delete cart[id]; else cart[id] = newQty;
+            filterMenu(currentCategory);
             calculateTotal();
         }
 
         function calculateTotal() {
             let total = 0;
             let count = 0;
-            
             Object.keys(cart).forEach(id => {
-                const item = allItems[id];
-                // Netwaye pri a (retire HTG ak espas) pou fè kalkil
-                const cleanPrice = parseInt(item.prix.replace(/[^0-9]/g, '')) || 0;
-                total += cleanPrice * cart[id];
+                const price = parseInt(allItems[id].prix.replace(/[^0-9]/g, '')) || 0;
+                total += price * cart[id];
                 count++;
             });
-
             document.getElementById('total-price').innerText = total.toLocaleString() + " HTG";
             document.getElementById('cart-bar').classList.toggle('show', count > 0);
         }
 
         function sendOrder() {
-            let message = `*COMMANDE PRISME - ${restauNom.toUpperCase()}*\n`;
-            message += `----------------------------\n`;
+            let message = `*COMMANDE - ${restauNom.toUpperCase()}*\n\n`;
             let total = 0;
-
             Object.keys(cart).forEach(id => {
                 const item = allItems[id];
-                const cleanPrice = parseInt(item.prix.replace(/[^0-9]/g, '')) || 0;
-                const subtotal = cleanPrice * cart[id];
-                message += `🔸 *${cart[id]}x* ${item.nom}\n    (${item.prix})\n`;
-                total += subtotal;
+                const price = parseInt(item.prix.replace(/[^0-9]/g, '')) || 0;
+                message += `▪️ *${cart[id]}x* ${item.nom} (${item.prix})\n`;
+                total += price * cart[id];
             });
-
-            message += `----------------------------\n`;
-            message += `*TOTAL À PAYER: ${total.toLocaleString()} HTG*`;
-            
-            const waUrl = `https://wa.me/${restauPhone}?text=${encodeURIComponent(message)}`;
-            window.open(waUrl, '_blank');
+            message += `\n💰 *TOTAL: ${total.toLocaleString()} HTG*`;
+            window.open(`https://wa.me/${restauPhone}?text=${encodeURIComponent(message)}`, '_blank');
         }
     </script>
 </body>
