@@ -26,12 +26,11 @@
     <div class="px-4 -mt-16 relative z-10">
         <div class="bg-white rounded-3xl p-5 shadow-xl flex items-center space-x-4 border border-gray-100">
             <img id="restau-logo" src="" class="w-20 h-20 rounded-2xl border-2 border-orange-50 shadow-sm object-cover bg-white">
-            <div>
-                <h1 id="restau-nom" class="text-2xl font-black text-gray-800 tracking-tight text-orange-500">Chargement...</h1>
+            <div class="flex-1">
+                <h1 id="restau-nom" class="text-2xl font-black text-gray-800 tracking-tight text-orange-500 italic">Chargement...</h1>
                 <p id="restau-desc" class="text-[10px] text-gray-400 font-medium italic mb-1 line-clamp-1"></p>
                 <div class="flex items-center space-x-2">
-                    <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold uppercase">Ouvert</span>
-                    <span id="restau-tel" class="text-[10px] text-gray-400 font-bold"></span>
+                    <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Ouvert</span>
                 </div>
             </div>
         </div>
@@ -43,20 +42,19 @@
 
     <div id="menu-container" class="px-4 space-y-10"></div>
 
-    <div id="cart-bar" class="cart-footer fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-5 rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50">
+    <div id="cart-bar" class="cart-footer fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-6 rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50">
         <div class="flex justify-between items-center max-w-lg mx-auto">
             <div>
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Total</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">Total à payer</p>
                 <p id="total-price" class="text-2xl font-black text-gray-800">0 HTG</p>
             </div>
-            <button onclick="askTableNumber()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-orange-200 flex items-center space-x-2 transition-all active:scale-95">
-                <span>COMMANDER</span>
+            <button onclick="askTableAndSend()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-orange-200 flex items-center space-x-2 transition-all active:scale-95">
+                <span class="tracking-tight">COMMANDER</span>
             </button>
         </div>
     </div>
 
     <script>
-        // Konfigirasyon Firebase ou
         const firebaseConfig = {
             apiKey: "AIza...",
             authDomain: "le-menu-20dd1.firebaseapp.com",
@@ -77,7 +75,7 @@
         let cart = {};
         let restauNom = "";
 
-        // 1. Rale Enfòmasyon Restoran
+        // 1. Info Restaurant
         db.ref('restaurants/' + resID + '/info').on('value', (snap) => {
             const info = snap.val();
             if(info) {
@@ -85,24 +83,22 @@
                 document.getElementById('restau-nom').innerText = info.nom;
                 document.getElementById('restau-desc').innerText = info.description;
                 document.getElementById('restau-logo').src = info.logoUrl;
-                document.getElementById('restau-tel').innerText = info.telephone;
             }
         });
 
-        // 2. Rale Menu
+        // 2. Menu
         db.ref('restaurants/' + resID + '/menu').on('value', (snap) => {
             allItems = snap.val() || {};
-            updateCategoryButtons();
+            updateCategories();
             filterMenu('Tout');
         });
 
-        function updateCategoryButtons() {
-            const cats = new Set();
-            Object.values(allItems).forEach(item => { if(item.categorie) cats.add(item.categorie); });
+        function updateCategories() {
+            const cats = new Set(Object.values(allItems).map(i => i.categorie));
             const bar = document.getElementById('category-bar');
-            bar.innerHTML = `<button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Tout</button>`;
-            cats.forEach(cat => {
-                bar.innerHTML += `<button onclick="filterMenu('${cat}')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">${cat}</button>`;
+            bar.innerHTML = `<button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">Tout</button>`;
+            cats.forEach(c => {
+                if(c) bar.innerHTML += `<button onclick="filterMenu('${c}')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm text-sm">${c}</button>`;
             });
         }
 
@@ -113,22 +109,21 @@
 
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
-            
-            const catsInMenu = [...new Set(Object.values(allItems).map(i => i.categorie))];
+            const cats = [...new Set(Object.values(allItems).map(i => i.categorie))];
 
-            catsInMenu.forEach(cat => {
+            cats.forEach(cat => {
                 if (selectedCat !== 'Tout' && selectedCat !== cat) return;
                 const items = Object.keys(allItems).filter(key => allItems[key].categorie === cat);
 
                 if (items.length > 0) {
-                    let section = `<div><h2 class="text-xl font-black text-gray-800 mb-5 flex items-center uppercase tracking-tight"><span class="w-1.5 h-6 bg-orange-500 rounded-full mr-3"></span>${cat}</h2><div class="space-y-4">`;
+                    let section = `<div><h2 class="text-xl font-black text-gray-800 mb-5 flex items-center uppercase tracking-tight italic"><span class="w-1.5 h-6 bg-orange-500 rounded-full mr-3"></span>${cat}</h2><div class="space-y-4">`;
                     
                     items.forEach(id => {
                         const item = allItems[id];
                         const qty = cart[id] || 0;
                         section += `
-                            <div class="bg-white rounded-3xl p-3 shadow-sm border border-gray-100 flex items-center space-x-4">
-                                <img src="${item.imageUrl}" class="w-24 h-24 rounded-2xl object-cover">
+                            <div class="bg-white rounded-[2rem] p-3 shadow-sm border border-gray-100 flex items-center space-x-4">
+                                <img src="${item.imageUrl}" class="w-24 h-24 rounded-2xl object-cover bg-gray-50">
                                 <div class="flex-1">
                                     <h3 class="font-bold text-gray-800">${item.nom}</h3>
                                     <p class="text-[10px] text-gray-400 line-clamp-1">${item.description || ''}</p>
@@ -137,7 +132,7 @@
                                         <div class="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
                                             <button onclick="updateCart('${id}', -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400"><i class="fas fa-minus text-xs"></i></button>
                                             <span id="qty-${id}" class="mx-3 font-black text-gray-700 text-sm">${qty}</span>
-                                            <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-orange-500 rounded-lg shadow-sm text-white"><i class="fas fa-plus text-xs"></i></button>
+                                            <button onclick="updateCart('${id}', 1)" class="w-8 h-8 flex items-center justify-center bg-orange-500 rounded-lg shadow-sm text-white active:scale-90"><i class="fas fa-plus text-xs"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -159,73 +154,77 @@
 
         function calculateTotal() {
             let total = 0;
-            let hasItems = false;
+            let count = 0;
             Object.keys(cart).forEach(id => {
                 const price = parseInt(allItems[id].prix.replace(/\D/g,''));
                 total += price * cart[id];
-                hasItems = true;
+                count++;
             });
             document.getElementById('total-price').innerText = total.toLocaleString() + " HTG";
-            document.getElementById('cart-bar').classList.toggle('show', hasItems);
+            document.getElementById('cart-bar').classList.toggle('show', count > 0);
         }
 
-        // FONKSYON POU MANDE TAB LA
-        async function askTableNumber() {
+        // Fonksyon notifikasyon an Français
+        async function askTableAndSend() {
             const { value: table } = await Swal.fire({
                 title: 'Numéro de Table',
                 input: 'number',
-                inputLabel: 'À quelle table êtes-vous assis ?',
-                inputPlaceholder: 'Ex: 5',
-                confirmButtonText: 'Confirmer',
+                inputLabel: 'À quelle table êtes-vous installé ?',
+                inputPlaceholder: 'Entrez le numéro de votre table',
+                confirmButtonText: 'CONFIRMER',
                 confirmButtonColor: '#F39C12',
+                cancelButtonText: 'ANNULER',
                 showCancelButton: true,
-                cancelButtonText: 'Annuler'
+                inputAttributes: { min: 1, step: 1 },
+                validationMessage: 'Veuillez entrer un numéro de table valide'
             });
 
             if (table) {
-                sendOrderToFirebase(table);
+                sendToFirebase(table);
             }
         }
 
-        function sendOrderToFirebase(tableNumber) {
-            const orderID = "ORDER_" + Date.now();
-            let itemsToSave = {};
-            let totalOrder = 0;
+        function sendToFirebase(tableNum) {
+            const orderId = "CMD_" + Date.now();
+            let itemsList = {};
+            let totalFinal = 0;
 
             Object.keys(cart).forEach(id => {
                 const item = allItems[id];
                 const price = parseInt(item.prix.replace(/\D/g,''));
-                itemsToSave[id] = {
+                itemsList[id] = {
                     nom: item.nom,
                     quantite: cart[id],
                     prix: item.prix,
-                    subtotal: price * cart[id]
+                    subtotal: (price * cart[id]) + " HTG"
                 };
-                totalOrder += price * cart[id];
+                totalFinal += (price * cart[id]);
             });
 
-            const finalOrder = {
-                items: itemsToSave,
-                statut: "nouveau",
-                table: "Table " + tableNumber,
-                timestamp: Date.now(),
-                total: totalOrder + " HTG"
+            const commandeData = {
+                id: orderId,
+                table: "Table " + tableNum,
+                articles: itemsList,
+                total: totalFinal + " HTG",
+                statut: "en_attente",
+                date: new Date().toLocaleString('fr-FR')
             };
 
-            // Voye kòmand lan nan Firebase
-            db.ref(`restaurants/${resID}/commandes/${orderID}`).set(finalOrder)
+            // Voye nan Firebase anba ne 'commandes'
+            db.ref(`restaurants/${resID}/commandes/${orderId}`).set(commandeData)
             .then(() => {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Merci !',
-                    text: 'Votre commande a été envoyée au restaurant.',
-                    confirmButtonColor: '#F39C12'
+                    title: 'Commande Envoyée !',
+                    text: 'Votre commande a bien été reçue par le restaurant.',
+                    confirmButtonColor: '#28a745'
                 });
-                cart = {}; // Vide panyen an
+                // Reset panyen
+                cart = {};
                 calculateTotal();
                 filterMenu('Tout');
             })
-            .catch((error) => {
+            .catch(err => {
                 Swal.fire('Erreur', 'Impossible d\'envoyer la commande', 'error');
             });
         }
