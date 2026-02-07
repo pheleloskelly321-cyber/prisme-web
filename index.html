@@ -9,51 +9,54 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .category-pill { white-space: nowrap; transition: all 0.3s; }
-        .category-pill.active { background-color: #F39C12; color: white; }
-        .whatsapp-btn { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .cat-btn.active { background-color: #F39C12; color: white; border-color: #F39C12; }
     </style>
 </head>
 <body class="bg-gray-50 pb-24">
 
-    <div class="relative h-48 w-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');">
-        <div class="absolute inset-0 bg-black/30"></div>
+    <div class="relative h-52 w-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');">
+        <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
-    <div class="px-4 -mt-12 relative z-10">
-        <div class="bg-white rounded-2xl p-4 shadow-lg flex items-start space-x-4">
-            <img id="restau-logo" src="" class="w-20 h-20 rounded-xl border-4 border-white shadow-md object-cover bg-white">
-            <div class="pt-2">
-                <h1 id="restau-nom" class="text-xl font-bold text-gray-800">Chargement...</h1>
-                <p id="restau-addr" class="text-sm text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i> Haïti</p>
+    <div class="px-4 -mt-16 relative z-10">
+        <div class="bg-white rounded-3xl p-5 shadow-xl flex items-center space-x-4 border border-gray-100">
+            <img id="restau-logo" src="https://via.placeholder.com/80" class="w-20 h-20 rounded-2xl border-2 border-orange-50 shadow-sm object-cover bg-white">
+            <div>
+                <h1 id="restau-nom" class="text-2xl font-black text-gray-800 tracking-tight">Chargement...</h1>
+                <p class="text-sm text-gray-400 font-medium"><i class="fas fa-map-marker-alt text-orange-500 mr-1"></i> Pétion-Ville, Haïti</p>
+                <div class="flex items-center mt-1">
+                    <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">Ouvert</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="flex overflow-x-auto space-x-2 px-4 py-6 no-scrollbar">
-        <button class="category-pill active px-6 py-2 rounded-full border border-gray-200 bg-white text-gray-600 font-medium shadow-sm">Tout</button>
-        <button class="category-pill px-6 py-2 rounded-full border border-gray-200 bg-white text-gray-600 font-medium shadow-sm">Entrées</button>
-        <button class="category-pill px-6 py-2 rounded-full border border-gray-200 bg-white text-gray-600 font-medium shadow-sm">Plats</button>
-        <button class="category-pill px-6 py-2 rounded-full border border-gray-200 bg-white text-gray-600 font-medium shadow-sm">Boissons</button>
+    <div class="flex overflow-x-auto space-x-3 px-4 py-8 no-scrollbar" id="category-bar">
+        <button onclick="filterMenu('Tout')" class="cat-btn active flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Tout</button>
+        <button onclick="filterMenu('Entrées')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Entrées</button>
+        <button onclick="filterMenu('Plats Principaux')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Plats Principaux</button>
+        <button onclick="filterMenu('Grillades')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Grillades</button>
+        <button onclick="filterMenu('Fruits de mer')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Fruits de mer</button>
+        <button onclick="filterMenu('Boissons')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Boissons</button>
+        <button onclick="filterMenu('Desserts')" class="cat-btn flex-shrink-0 px-6 py-2.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold shadow-sm transition-all text-sm">Desserts</button>
     </div>
 
-    <div class="px-4 space-y-6">
-        <h2 id="current-category" class="text-lg font-bold text-gray-800 border-l-4 border-orange-500 pl-3">Tous les plats</h2>
-        <div id="menu-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            </div>
-    </div>
+    <div id="menu-container" class="px-4 space-y-10">
+        </div>
 
-    <a id="whatsapp-link" href="#" class="whatsapp-btn fixed bottom-6 right-6 bg-[#25D366] text-white px-6 py-3 rounded-full flex items-center space-x-2 font-bold z-50">
-        <i class="fab fa-whatsapp text-2xl"></i>
-        <span>WhatsApp</span>
+    <a id="whatsapp-link" href="#" class="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl flex items-center space-x-3 z-50 hover:scale-105 transition-transform active:scale-95">
+        <i class="fab fa-whatsapp text-3xl"></i>
+        <span class="font-bold pr-2">Commander</span>
     </a>
 
-    <div class="mt-12 p-8 text-center bg-white">
-        <p class="text-sm text-gray-400">Propulsé par <span class="font-bold text-orange-500">Prisme</span></p>
+    <div class="mt-20 p-10 text-center">
+        <p class="text-xs text-gray-300 uppercase tracking-widest font-bold">Propulsé par Prisme</p>
     </div>
 
     <script>
-        // METE CONFIG OU LA A
+        // Kopi "firebaseConfig" ou a isit la
         const firebaseConfig = {
             apiKey: "AIza...",
             authDomain: "le-menu-20dd1.firebaseapp.com",
@@ -69,6 +72,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const resID = urlParams.get('id') || 'lakay_gourmet_id';
+        let allData = {};
 
         // 1. Rale Enfòmasyon Restoran
         db.ref('restaurants/' + resID + '/info').on('value', (snap) => {
@@ -80,26 +84,57 @@
             }
         });
 
-        // 2. Rale Menu an ak bèl Design (jan sa parèt nan Lakay Gourmet)
+        // 2. Rale ak Trete Menu an
         db.ref('restaurants/' + resID + '/menu').on('value', (snap) => {
-            const menuList = document.getElementById('menu-list');
-            menuList.innerHTML = "";
-            snap.forEach((child) => {
-                const item = child.val();
-                menuList.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex overflow-hidden">
-                        <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" class="w-32 h-32 object-cover">
-                        <div class="p-4 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h3 class="font-bold text-gray-800">${item.nom}</h3>
-                                <p class="text-xs text-gray-400 mt-1 line-clamp-2">${item.description || ''}</p>
-                            </div>
-                            <div class="text-[#F39C12] font-bold mt-2">${item.prix}</div>
-                        </div>
-                    </div>
-                `;
-            });
+            allData = snap.val() || {};
+            filterMenu('Tout'); // Montre tout nan kòmansman
         });
+
+        function filterMenu(selectedCat) {
+            // Chanje bouton aktif la
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText === selectedCat) btn.classList.add('active');
+            });
+
+            const container = document.getElementById('menu-container');
+            container.innerHTML = "";
+
+            const categories = ["Entrées", "Plats Principaux", "Grillades", "Fruits de mer", "Boissons", "Desserts"];
+
+            categories.forEach(cat => {
+                // Filtre si se pa "Tout" epi se pa kategori chwazi a, sote l
+                if (selectedCat !== 'Tout' && selectedCat !== cat) return;
+
+                // Jwenn tout manje ki nan kategori sa a
+                const itemsInCat = Object.values(allData).filter(item => item.categorie === cat);
+
+                if (itemsInCat.length > 0) {
+                    // Ajoute Tit Kategori a
+                    let catSection = `<div>
+                        <h2 class="text-xl font-black text-gray-800 mb-5 flex items-center">
+                            <span class="w-1.5 h-6 bg-orange-500 rounded-full mr-3"></span>${cat}
+                        </h2>
+                        <div class="grid grid-cols-1 gap-4">`;
+
+                    // Ajoute chak manje
+                    itemsInCat.forEach(item => {
+                        catSection += `
+                            <div class="bg-white rounded-3xl p-3 shadow-sm border border-gray-50 flex items-center space-x-4">
+                                <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-2xl object-cover shadow-sm">
+                                <div class="flex-1 pr-2">
+                                    <h3 class="font-bold text-gray-800 text-lg">${item.nom}</h3>
+                                    <p class="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">${item.description || ''}</p>
+                                    <div class="mt-3 text-[#F39C12] font-black text-lg">${item.prix}</div>
+                                </div>
+                            </div>`;
+                    });
+
+                    catSection += `</div></div>`;
+                    container.innerHTML += catSection;
+                }
+            });
+        }
     </script>
 </body>
 </html>
